@@ -926,17 +926,14 @@
 
         .testimonials-track {
             display: flex;
-            transition: transform 0.5s ease;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             gap: 30px;
             width: fit-content;
             will-change: transform;
             padding: 10px 0;
-            /* Add vertical padding for hover effect */
         }
 
         .testimonial-card {
-            width: 550px;
-            max-width: 550px;
             background: linear-gradient(135deg, #1a1a1a, #0c0c0c);
             padding: 30px;
             border-radius: 20px;
@@ -948,7 +945,7 @@
             flex-shrink: 0;
             transform: translateZ(0);
             position: relative;
-            /* Ensure proper stacking */
+            /* Remove fixed widths - will be set by JavaScript */
         }
 
         .testimonial-card:hover {
@@ -1050,23 +1047,6 @@
             /* Optimize for animations */
         }
 
-        /* Ensure smooth performance */
-        .testimonial-card {
-            width: 550px;
-            max-width: 550px;
-            background: linear-gradient(135deg, #1a1a1a, #0c0c0c);
-            padding: 30px;
-            border-radius: 20px;
-            border: 1px solid #333;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-shrink: 0;
-            transform: translateZ(0);
-            /* Enable hardware acceleration */
-        }
-
         .testimonials-track {
             will-change: transform;
             backface-visibility: hidden;
@@ -1076,69 +1056,63 @@
         /* Responsive adjustments */
         @media (max-width: 1200px) {
             .testimonials-carousel {
-                max-width: 600px;
+                max-width: 100%;
                 padding: 15px;
             }
 
             .testimonial-card {
-                width: 100%;
-                max-width: 550px;
+                width: calc(50% - 10px);
+                max-width: calc(50% - 10px);
             }
         }
 
         @media (max-width: 768px) {
             .testimonials-carousel {
                 padding: 10px;
+                overflow: visible;
             }
 
             .testimonials-track {
+                gap: 15px;
                 padding: 5px 0;
             }
 
             .testimonial-card {
-                width: 100%;
                 flex-direction: column;
                 text-align: center;
-                gap: 20px;
-                padding: 25px;
-            }
-
-            .testimonial-card:hover {
-                transform: translateY(-3px) translateZ(0);
-                /* Smaller hover effect on mobile */
-            }
-
-            .testimonial-img {
-                width: 80px;
-                height: 80px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .testimonial-card {
-                flex: 0 0 100%;
-                max-width: 100%;
-                scroll-snap-align: start;
-                text-align: center;
-                flex-direction: column;
+                gap: 15px;
                 padding: 20px;
             }
 
-            .testimonials-carousel {
-                overflow-x: hidden;
-                scroll-snap-type: x mandatory;
+            .testimonial-card:hover {
+                transform: translateY(-2px);
             }
 
-            .testimonials-track {
-                display: flex;
-                gap: 30px;
-                width: max-content;
-                scroll-snap-type: x mandatory;
+            .testimonial-img {
+                width: 70px;
+                height: 70px;
+            }
+
+            .testimonial-name {
+                font-size: 1.1rem;
+            }
+
+            .testimonial-review {
+                font-size: 0.9rem;
             }
         }
 
+        @media (max-width: 480px) {
+            .testimonial-card {
+                padding: 15px;
+                gap: 12px;
+            }
 
-
+            .testimonial-img {
+                width: 60px;
+                height: 60px;
+            }
+        }
 
 
         @media (max-width: 600px) {
@@ -1873,6 +1847,7 @@
     const totalTestimonials = originalTestimonials.length;
     const track = document.getElementById('testimonialsTrack');
     const indicatorsContainer = document.getElementById('carouselIndicators');
+    let isTransitioning = false;
 
     // Auto-scroll control variables
     let autoScrollInterval;
@@ -1880,21 +1855,22 @@
     let interactionTimeout;
 
     // Function to get testimonials per view based on screen size
+    // Function to get testimonials per view based on screen size
     function getTestimonialsPerView() {
         if (window.innerWidth <= 768) return 1;
-        if (window.innerWidth <= 1200) return 1;
-        return 2;
+        if (window.innerWidth <= 1200) return 2;
+        return 2; // Show 2 on desktop, not more
     }
 
     let testimonialsPerView = getTestimonialsPerView();
-    let maxSlides = Math.max(1, Math.ceil(totalTestimonials / testimonialsPerView));
+    let maxSlides = totalTestimonials; // Show all testimonials individually
 
     // Create seamless loop by duplicating testimonials
     function createSeamlessLoop() {
         // Clear existing track
         track.innerHTML = '';
 
-        // Add testimonials for backward seamless scroll (add all testimonials at beginning)
+        // Add testimonials for backward seamless scroll
         originalTestimonials.forEach(testimonial => {
             const clone = testimonial.cloneNode(true);
             track.appendChild(clone);
@@ -1906,14 +1882,15 @@
             track.appendChild(clone);
         });
 
-        // Add testimonials for forward seamless scroll (add all testimonials at end)
+        // Add testimonials for forward seamless scroll
         originalTestimonials.forEach(testimonial => {
             const clone = testimonial.cloneNode(true);
             track.appendChild(clone);
         });
 
-        // Set initial position to the first set of original testimonials (middle section)
-        currentTestimonial = totalTestimonials;
+        // Set initial position and refresh sizes
+        currentTestimonial = 0;
+        refreshCardSizes();  // Add this line
         updateCarouselPosition();
     }
 
@@ -1921,8 +1898,8 @@
     function createIndicators() {
         indicatorsContainer.innerHTML = '';
 
-        // Create indicators based on how many "slides" we have
-        for (let i = 0; i < maxSlides; i++) {
+        // Create one indicator per testimonial
+        for (let i = 0; i < totalTestimonials; i++) {
             const dot = document.createElement('div');
             dot.className = 'indicator-dot';
             if (i === 0) dot.classList.add('active');
@@ -1955,37 +1932,49 @@
 
     // Move carousel with seamless loop
     function moveCarousel(direction) {
+        // Prevent multiple rapid calls
+        if (track.style.transition === 'none') return;
+
         if (direction === 1) {
             // Moving forward
             currentTestimonial++;
             updateCarouselPosition();
 
-            // Reset to beginning seamlessly when we've moved past the original testimonials
-            if (currentTestimonial >= testimonialsPerView + totalTestimonials) {
+            // Reset to beginning seamlessly when we reach the end
+            if (currentTestimonial >= totalTestimonials) {
                 setTimeout(() => {
-                    track.style.transition = 'none';
-                    currentTestimonial = testimonialsPerView; // Reset to first original testimonial
-                    updateCarouselPosition();
-                    setTimeout(() => {
-                        track.style.transition = 'transform 0.5s ease';
-                    }, 50);
-                }, 500);
+                    if (track.style.transition !== 'none') { // Double check
+                        track.style.transition = 'none';
+                        currentTestimonial = 0;
+                        updateCarouselPosition();
+                        // Use requestAnimationFrame for smoother transition
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                track.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                            });
+                        });
+                    }
+                }, 450); // Slightly longer delay
             }
         } else {
             // Moving backward
             currentTestimonial--;
             updateCarouselPosition();
 
-            // Reset to end seamlessly when we've moved before the duplicated beginning
-            if (currentTestimonial < testimonialsPerView) {
+            // Reset to end seamlessly when we go before the beginning
+            if (currentTestimonial < 0) {
                 setTimeout(() => {
-                    track.style.transition = 'none';
-                    currentTestimonial = totalTestimonials; // Reset to last original testimonial
-                    updateCarouselPosition();
-                    setTimeout(() => {
-                        track.style.transition = 'transform 0.5s ease';
-                    }, 50);
-                }, 500);
+                    if (track.style.transition !== 'none') { // Double check
+                        track.style.transition = 'none';
+                        currentTestimonial = totalTestimonials - 1;
+                        updateCarouselPosition();
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                track.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                            });
+                        });
+                    }
+                }, 450);
             }
         }
 
@@ -1993,55 +1982,181 @@
     }
 
     // Go to specific testimonial
-    function goToTestimonial(slideIndex) {
-        // Calculate which testimonial to show based on slide index
-        const testimonialIndex = slideIndex * testimonialsPerView;
-
-        // Set position in the middle section (original testimonials)
-        currentTestimonial = totalTestimonials + testimonialIndex;
-
+    function goToTestimonial(index) {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        currentTestimonial = index;
         updateCarouselPosition();
         updateIndicators();
+        setTimeout(() => {
+            isTransitioning = false;
+        }, 500);
     }
 
     // Update carousel position
     function updateCarouselPosition() {
+        const carousel = document.querySelector('.testimonials-carousel');
+        const containerWidth = carousel.offsetWidth;
         const isMobile = window.innerWidth <= 768;
-        const card = document.querySelector('.testimonial-card');
-        const cardWidth = isMobile ? card.offsetWidth : 550;
-        const gap = 30;
-        const moveDistance = currentTestimonial * (cardWidth + gap);
-        track.style.transform = `translateX(-${moveDistance}px)`;
+        const isTablet = window.innerWidth <= 1200;
 
+        let cardWidth, gap;
+
+        if (isMobile) {
+            cardWidth = containerWidth - 40; // Full width minus margins
+            gap = 15;
+        } else if (isTablet) {
+            cardWidth = 480;
+            gap = 20;
+        } else {
+            cardWidth = 550;
+            gap = 30;
+        }
+
+        // Apply the width to all cards
+        const allCards = track.querySelectorAll('.testimonial-card');
+        allCards.forEach(card => {
+            card.style.width = cardWidth + 'px';
+            card.style.maxWidth = cardWidth + 'px';
+            card.style.minWidth = cardWidth + 'px';
+        });
+
+        // Calculate position: add totalTestimonials to skip the first set of clones
+        const actualPosition = currentTestimonial + totalTestimonials;
+        const moveDistance = actualPosition * (cardWidth + gap);
+
+        track.style.transform = `translateX(-${moveDistance}px)`;
+    }
+
+    function refreshCardSizes() {
+        const carousel = document.querySelector('.testimonials-carousel');
+        const containerWidth = carousel.offsetWidth;
+        const isMobile = window.innerWidth <= 768;
+        const isTablet = window.innerWidth <= 1200;
+
+        let cardWidth;
+
+        if (isMobile) {
+            cardWidth = containerWidth - 40;
+        } else if (isTablet) {
+            cardWidth = 480;
+        } else {
+            cardWidth = 550;
+        }
+
+        // Apply width to all existing cards
+        const allCards = document.querySelectorAll('.testimonial-card');
+        allCards.forEach(card => {
+            card.style.width = cardWidth + 'px';
+            card.style.maxWidth = cardWidth + 'px';
+            card.style.minWidth = cardWidth + 'px';
+        });
     }
 
     // Update indicators based on current position
     function updateIndicators() {
-        // Calculate the actual slide position in the original testimonials
-        let actualPosition = currentTestimonial - totalTestimonials;
+        // Handle the current testimonial position for indicators
+        let indicatorIndex = currentTestimonial;
 
-        // Handle negative positions (when at the beginning duplicates)
-        if (actualPosition < 0) {
-            actualPosition = totalTestimonials + actualPosition;
+        // Normalize the indicator index to be within bounds
+        if (indicatorIndex < 0) {
+            indicatorIndex = totalTestimonials - 1;
+        } else if (indicatorIndex >= totalTestimonials) {
+            indicatorIndex = 0;
         }
-
-        // Handle positions beyond original testimonials (when at the end duplicates)
-        if (actualPosition >= totalTestimonials) {
-            actualPosition = actualPosition % totalTestimonials;
-        }
-
-        // Calculate which indicator should be active based on testimonialsPerView
-        const indicatorIndex = Math.floor(actualPosition / testimonialsPerView);
-
-        // Make sure the indicator index is within bounds
-        const safeIndicatorIndex = Math.max(0, Math.min(indicatorIndex, maxSlides - 1));
 
         document.querySelectorAll('.indicator-dot').forEach((dot, index) => {
-            dot.classList.toggle('active', index === safeIndicatorIndex);
+            dot.classList.toggle('active', index === indicatorIndex);
         });
     }
 
-    // Auto-slide functionality
+    // Handle window resize
+    function handleResize() {
+        const oldTestimonialsPerView = testimonialsPerView;
+        testimonialsPerView = getTestimonialsPerView();
+
+        // Always recreate on resize to ensure proper sizing
+        createSeamlessLoop();
+        createIndicators();
+        updateCarouselPosition();
+        updateIndicators();
+    }
+
+    // Improved mobile touch handling
+    function addTouchSupport() {
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        let startTime = 0;
+
+        track.addEventListener('touchstart', (e) => {
+            if (isTransitioning) return;
+            startX = e.touches[0].clientX;
+            startTime = Date.now();
+            isDragging = true;
+            handleUserInteraction();
+        }, { passive: true });
+
+        track.addEventListener('touchmove', (e) => {
+            if (!isDragging || isTransitioning) return;
+
+            currentX = e.touches[0].clientX;
+            const deltaX = currentX - startX;
+
+            if (Math.abs(deltaX) > 10) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        track.addEventListener('touchend', (e) => {
+            if (!isDragging || isTransitioning) return;
+
+            isDragging = false;
+
+            const deltaX = currentX - startX;
+            const deltaTime = Date.now() - startTime;
+            const velocity = Math.abs(deltaX) / deltaTime;
+
+            if (Math.abs(deltaX) > 50 || velocity > 0.3) {
+                isTransitioning = true;
+                if (deltaX > 0) {
+                    moveCarousel(-1);
+                } else {
+                    moveCarousel(1);
+                }
+                setTimeout(() => {
+                    isTransitioning = false;
+                }, 500);
+            }
+
+            startX = 0;
+            currentX = 0;
+        }, { passive: true });
+    }
+
+    // Initialize controls
+    function initializeControls() {
+        document.getElementById('prevBtn').onclick = () => {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            handleUserInteraction();
+            moveCarousel(-1);
+            setTimeout(() => {
+                isTransitioning = false;
+            }, 500);
+        };
+
+        document.getElementById('nextBtn').onclick = () => {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            handleUserInteraction();
+            moveCarousel(1);
+            setTimeout(() => {
+                isTransitioning = false;
+            }, 500);
+        };
+    }
+
     function startAutoSlide() {
         if (autoScrollInterval) {
             clearInterval(autoScrollInterval);
@@ -2049,42 +2164,15 @@
 
         if (!isUserInteracting) {
             autoScrollInterval = setInterval(() => {
-                if (!isUserInteracting) {
+                if (!isUserInteracting && !isTransitioning) {
+                    isTransitioning = true;
                     moveCarousel(1);
+                    setTimeout(() => {
+                        isTransitioning = false;
+                    }, 500);
                 }
             }, 4000);
         }
-    }
-
-    // Handle window resize
-    function handleResize() {
-        const oldTestimonialsPerView = testimonialsPerView;
-        testimonialsPerView = getTestimonialsPerView();
-        maxSlides = Math.max(1, Math.ceil(totalTestimonials / testimonialsPerView));
-
-        if (oldTestimonialsPerView !== testimonialsPerView) {
-            // Recreate everything when testimonials per view changes
-            createSeamlessLoop();
-            createIndicators();
-            updateIndicators();
-        } else {
-            // Just update positions if no structural change
-            updateCarouselPosition();
-            updateIndicators();
-        }
-    }
-
-    // Initialize controls
-    function initializeControls() {
-        document.getElementById('prevBtn').onclick = () => {
-            handleUserInteraction();
-            moveCarousel(-1);
-        };
-
-        document.getElementById('nextBtn').onclick = () => {
-            handleUserInteraction();
-            moveCarousel(1);
-        };
     }
 
     // Initialize carousel
@@ -2092,27 +2180,37 @@
         createSeamlessLoop();
         createIndicators();
         initializeControls();
-        startAutoSlide();
+        addTouchSupport(); // Add this line
 
-        window.addEventListener('resize', handleResize);
+        // Delay auto-start to ensure everything is loaded
+        setTimeout(() => {
+            startAutoSlide();
+        }, 500);
 
-        // Pause auto-scroll on hover
-        const carousel = document.querySelector('.testimonials-carousel');
-
-        carousel.addEventListener('mouseenter', () => {
-            isUserInteracting = true;
-            if (autoScrollInterval) {
-                clearInterval(autoScrollInterval);
-            }
+        window.addEventListener('resize', () => {
+            clearTimeout(window.resizeTimeout);
+            window.resizeTimeout = setTimeout(handleResize, 150);
         });
 
-        carousel.addEventListener('mouseleave', () => {
-            setTimeout(() => {
-                if (!isUserInteracting) {
-                    startAutoSlide();
+        // Pause auto-scroll on hover (desktop only)
+        if (window.innerWidth > 768) {
+            const carousel = document.querySelector('.testimonials-carousel');
+
+            carousel.addEventListener('mouseenter', () => {
+                isUserInteracting = true;
+                if (autoScrollInterval) {
+                    clearInterval(autoScrollInterval);
                 }
-            }, 500);
-        });
+            });
+
+            carousel.addEventListener('mouseleave', () => {
+                setTimeout(() => {
+                    if (!isUserInteracting) {
+                        startAutoSlide();
+                    }
+                }, 500);
+            });
+        }
     });
 
 </script>
