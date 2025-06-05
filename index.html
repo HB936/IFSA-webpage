@@ -1115,23 +1115,41 @@
         }
 
         @media (max-width: 768px) {
-            .testimonials-track {
-                overflow-x: scroll;
-                display: flex;
-                flex-wrap: nowrap;
+            .testimonial-card {
+                flex: 0 0 100%;
+                max-width: 100%;
+                scroll-snap-align: start;
+                text-align: center;
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            .testimonials-carousel {
+                overflow-x: hidden;
                 scroll-snap-type: x mandatory;
             }
 
-            .testimonial-card {
-                flex: 0 0 90%;
-                scroll-snap-align: start;
+            .testimonials-track {
+                display: flex;
+                gap: 30px;
+                width: max-content;
+                scroll-snap-type: x mandatory;
             }
         }
+
+
+
+
 
         @media (max-width: 600px) {
             .footer img {
                 max-width: 120px;
                 height: auto;
+            }
+
+            .hero h2 {
+                font-size: 35px;
+                padding: 10px;
             }
         }
     </style>
@@ -1988,12 +2006,13 @@
 
     // Update carousel position
     function updateCarouselPosition() {
-        const cardWidth = 550;
+        const isMobile = window.innerWidth <= 768;
+        const card = document.querySelector('.testimonial-card');
+        const cardWidth = isMobile ? card.offsetWidth : 550;
         const gap = 30;
-        // Fix: Remove the multiplication by testimonialsPerView
         const moveDistance = currentTestimonial * (cardWidth + gap);
-
         track.style.transform = `translateX(-${moveDistance}px)`;
+
     }
 
     // Update indicators based on current position
