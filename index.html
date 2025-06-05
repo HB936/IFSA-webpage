@@ -931,6 +931,8 @@
             width: fit-content;
             will-change: transform;
             padding: 10px 0;
+            backface-visibility: hidden;
+            perspective: 1000px;
         }
 
         .testimonial-card {
@@ -1038,21 +1040,6 @@
             transform: scale(1.2);
         }
 
-        .testimonials-track {
-            display: flex;
-            transition: transform 0.5s ease;
-            gap: 30px;
-            width: fit-content;
-            will-change: transform;
-            /* Optimize for animations */
-        }
-
-        .testimonials-track {
-            will-change: transform;
-            backface-visibility: hidden;
-            perspective: 1000px;
-        }
-
         /* Responsive adjustments */
         @media (max-width: 1200px) {
             .testimonials-carousel {
@@ -1060,16 +1047,22 @@
                 padding: 15px;
             }
 
+            .testimonials-track {
+                gap: 20px;
+            }
+
             .testimonial-card {
-                width: calc(50% - 10px);
-                max-width: calc(50% - 10px);
+                padding: 25px;
             }
         }
 
         @media (max-width: 768px) {
             .testimonials-carousel {
-                padding: 10px;
-                overflow: visible;
+                padding: 15px;
+                overflow: hidden;
+                /* CHANGED: Remove overflow: visible */
+                width: 100%;
+                max-width: 100%;
             }
 
             .testimonials-track {
@@ -1082,6 +1075,7 @@
                 text-align: center;
                 gap: 15px;
                 padding: 20px;
+                /* Width will be set by JavaScript */
             }
 
             .testimonial-card:hover {
@@ -1103,6 +1097,16 @@
         }
 
         @media (max-width: 480px) {
+            .testimonials-carousel {
+                padding: 10px;
+                /* CHANGED: Reduced padding */
+            }
+
+            .testimonials-track {
+                gap: 10px;
+                /* CHANGED: Reduced gap */
+            }
+
             .testimonial-card {
                 padding: 15px;
                 gap: 12px;
@@ -1112,8 +1116,47 @@
                 width: 60px;
                 height: 60px;
             }
+
+            .testimonial-name {
+                font-size: 1rem;
+                /* CHANGED: Reduced font size */
+            }
+
+            .testimonial-review {
+                font-size: 0.85rem;
+                /* CHANGED: Reduced font size */
+            }
         }
 
+        /* ADDED: Extra small screens */
+        @media (max-width: 360px) {
+            .testimonials-carousel {
+                padding: 5px;
+            }
+
+            .testimonials-track {
+                gap: 8px;
+            }
+
+            .testimonial-card {
+                padding: 12px;
+                gap: 10px;
+                border-radius: 15px;
+            }
+
+            .testimonial-img {
+                width: 50px;
+                height: 50px;
+            }
+
+            .testimonial-name {
+                font-size: 0.95rem;
+            }
+
+            .testimonial-review {
+                font-size: 0.8rem;
+            }
+        }
 
         @media (max-width: 600px) {
             .footer img {
@@ -1870,7 +1913,7 @@
         // Clear existing track
         track.innerHTML = '';
 
-        // Add testimonials for backward seamless scroll
+        // Add testimonials for backward seamless scroll (add all testimonials at beginning)
         originalTestimonials.forEach(testimonial => {
             const clone = testimonial.cloneNode(true);
             track.appendChild(clone);
@@ -1882,15 +1925,14 @@
             track.appendChild(clone);
         });
 
-        // Add testimonials for forward seamless scroll
+        // Add testimonials for forward seamless scroll (add all testimonials at end)
         originalTestimonials.forEach(testimonial => {
             const clone = testimonial.cloneNode(true);
             track.appendChild(clone);
         });
 
-        // Set initial position and refresh sizes
-        currentTestimonial = 0;
-        refreshCardSizes();  // Add this line
+        // Set initial position to the first original testimonial (middle section)
+        currentTestimonial = 0; // Start at 0 for the original testimonials
         updateCarouselPosition();
     }
 
@@ -1999,11 +2041,22 @@
         const containerWidth = carousel.offsetWidth;
         const isMobile = window.innerWidth <= 768;
         const isTablet = window.innerWidth <= 1200;
+        const isSmallMobile = window.innerWidth <= 480;
+        const isTinyMobile = window.innerWidth <= 360;
 
         let cardWidth, gap;
 
-        if (isMobile) {
-            cardWidth = containerWidth - 40; // Full width minus margins
+        if (isTinyMobile) {
+            // For very small screens
+            cardWidth = containerWidth - 20; // Account for carousel padding (5px * 2) + some margin
+            gap = 8;
+        } else if (isSmallMobile) {
+            // For small mobile screens
+            cardWidth = containerWidth - 30; // Account for carousel padding (10px * 2) + some margin
+            gap = 10;
+        } else if (isMobile) {
+            // For mobile screens
+            cardWidth = containerWidth - 40; // Account for carousel padding (15px * 2) + some margin
             gap = 15;
         } else if (isTablet) {
             cardWidth = 480;
@@ -2028,30 +2081,7 @@
         track.style.transform = `translateX(-${moveDistance}px)`;
     }
 
-    function refreshCardSizes() {
-        const carousel = document.querySelector('.testimonials-carousel');
-        const containerWidth = carousel.offsetWidth;
-        const isMobile = window.innerWidth <= 768;
-        const isTablet = window.innerWidth <= 1200;
 
-        let cardWidth;
-
-        if (isMobile) {
-            cardWidth = containerWidth - 40;
-        } else if (isTablet) {
-            cardWidth = 480;
-        } else {
-            cardWidth = 550;
-        }
-
-        // Apply width to all existing cards
-        const allCards = document.querySelectorAll('.testimonial-card');
-        allCards.forEach(card => {
-            card.style.width = cardWidth + 'px';
-            card.style.maxWidth = cardWidth + 'px';
-            card.style.minWidth = cardWidth + 'px';
-        });
-    }
 
     // Update indicators based on current position
     function updateIndicators() {
@@ -2078,8 +2108,12 @@
         // Always recreate on resize to ensure proper sizing
         createSeamlessLoop();
         createIndicators();
-        updateCarouselPosition();
-        updateIndicators();
+
+        // Add a small delay to ensure DOM is updated
+        setTimeout(() => {
+            updateCarouselPosition();
+            updateIndicators();
+        }, 50);
     }
 
     // Improved mobile touch handling
@@ -2103,7 +2137,8 @@
             currentX = e.touches[0].clientX;
             const deltaX = currentX - startX;
 
-            if (Math.abs(deltaX) > 10) {
+            // Prevent horizontal scroll on smaller movements
+            if (Math.abs(deltaX) > 5) {
                 e.preventDefault();
             }
         }, { passive: false });
@@ -2117,7 +2152,12 @@
             const deltaTime = Date.now() - startTime;
             const velocity = Math.abs(deltaX) / deltaTime;
 
-            if (Math.abs(deltaX) > 50 || velocity > 0.3) {
+            // Adjusted sensitivity for mobile
+            const isMobile = window.innerWidth <= 768;
+            const threshold = isMobile ? 30 : 50; // Lower threshold for mobile
+            const velocityThreshold = isMobile ? 0.2 : 0.3; // Lower velocity threshold for mobile
+
+            if (Math.abs(deltaX) > threshold || velocity > velocityThreshold) {
                 isTransitioning = true;
                 if (deltaX > 0) {
                     moveCarousel(-1);
