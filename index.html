@@ -807,6 +807,7 @@
 
 
         .prize-coin-container {
+            overflow: hidden;
             position: absolute;
             bottom: 0;
             left: 0;
@@ -829,9 +830,27 @@
             backdrop-filter: blur(1px);
             box-shadow: 0 -5px 15px rgba(255, 215, 0, 0.3);
             /* Match the trophy cup shape */
-            clip-path: polygon(10% 0%, 90% 0%, 85% 25%, 75% 50%,
-                    85% 75%, 90% 100%, 10% 100%, 15% 75%,
-                    25% 50%, 15% 25%);
+            clip-path: polygon(10% 0%,
+                    /* top left */
+                    60% 0%,
+                    /* top right */
+                    95% 0%,
+                    /* upper right curve */
+                    97% 30%,
+                    /* middle right (narrow) */
+                    89% 65%,
+                    /* lower right curve */
+                    80% 100%,
+                    /* bottom right */
+                    30% 100%,
+                    /* bottom left */
+                    25% 100%,
+                    /* lower left curve */
+                    11% 45%,
+                    /* middle left (narrow) */
+                    7.5% 30%
+                    /* upper left curve */
+                );
         }
 
         .prize-coin {
@@ -1175,7 +1194,7 @@
             display: flex;
             justify-content: center;
             gap: 40px;
-            
+
         }
     </style>
 </head>
@@ -1202,7 +1221,7 @@
             <div class="dashboard-grid">
                 <div class="stat-card">
                     <img class="people-img" src="people.png" alt="">
-                    <div class="stat-number" id="participants">134</div>
+                    <div style="margin-top: -15px;" class="stat-number" id="participants">134</div>
                     <div class="stat-label">Total Participants</div>
                 </div>
                 <div class="stat-card">
@@ -1227,7 +1246,7 @@
                                 <div class="prize-jar-info">
                                     <div id="prize-current-amount" class="prize-current-amount">€0</div>
                                 </div>
-                                <div style="font-size: 15px; color: #888; margin-top: 10px; text-align: center;">Prize
+                                <div style="font-size: 19px; color: #888; margin-top: 13px; text-align: center;">Prize
                                     Pool</div>
                             </div>
                         </div>
@@ -1575,208 +1594,6 @@
             </div>
         </div>
     </footer>
-
-    <script>
-        // Animated Counter Function
-        function animateCounter(elementId, targetValue, duration = 2000) {
-            const element = document.getElementById(elementId);
-            const startValue = 0;
-            const increment = targetValue / (duration / 16);
-            let currentValue = startValue;
-
-            const timer = setInterval(() => {
-                currentValue += increment;
-                if (currentValue >= targetValue) {
-                    currentValue = targetValue;
-                    clearInterval(timer);
-                }
-
-                if (elementId === 'prizePool') {
-                    element.textContent = '€' + Math.floor(currentValue).toLocaleString();
-                } else {
-                    element.textContent = Math.floor(currentValue).toLocaleString();
-                }
-            }, 16);
-        }
-
-        // Intersection Observer for animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    if (entry.target.id === 'dashboard') {
-                        // Animate counters when dashboard comes into view
-                        setTimeout(() => animateCounter('prizePool', 1170), 200);
-                        setTimeout(() => animateCounter('participants', 134), 400);
-                        setTimeout(() => animateCounter('countdown', 42), 600);
-                        setTimeout(() => animateCounter('universities', 28), 800);
-                    }
-
-                    // Add fade-in animation to sections
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Observe sections for scroll animations
-        document.addEventListener('DOMContentLoaded', () => {
-            const sections = document.querySelectorAll('.section, .dashboard');
-            sections.forEach(section => {
-                section.style.opacity = '0';
-                section.style.transform = 'translateY(30px)';
-                section.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-                observer.observe(section);
-            });
-
-            // Create floating particles
-            createFloatingParticles();
-
-            // Start real-time updates simulation
-            startLiveUpdates();
-        });
-
-        // Floating particles animation
-        function createFloatingParticles() {
-            const particlesContainer = document.getElementById('particles');
-            const particleCount = 50;
-
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 15 + 's';
-                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
-
-        // Smooth scrolling function
-        function scrollToSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            section.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-
-        // FAQ toggle function
-        function toggleFAQ(questionElement) {
-            const answer = questionElement.nextElementSibling;
-            const icon = questionElement.querySelector('.faq-icon');
-
-            // Close all other FAQs
-            document.querySelectorAll('.faq-answer').forEach(faq => {
-                if (faq !== answer) {
-                    faq.classList.remove('active');
-                    faq.previousElementSibling.querySelector('.faq-icon').classList.remove('rotated');
-                }
-            });
-
-            // Toggle current FAQ
-            answer.classList.toggle('active');
-            icon.classList.toggle('rotated');
-        }
-
-        // Simulate real-time updates (in real implementation, this would come from your backend)
-        function startLiveUpdates() {
-            let prizePool = 1170;
-            let participants = 134;
-            let universities = 28;
-
-            setInterval(() => {
-                // Randomly update values to simulate live activity
-                if (Math.random() > 0.7) { // 30% chance every 10 seconds
-                    participants += Math.floor(Math.random() * 3) + 1;
-                    prizePool = 500 + (participants * 10);
-                    if (Math.random() > 0.8) {
-                        universities += 1;
-                    }
-
-                    document.getElementById('prizePool').textContent = '€' + prizePool.toLocaleString();
-                    document.getElementById('participants').textContent = participants.toLocaleString();
-                    document.getElementById('universities').textContent = universities.toLocaleString();
-
-                }
-            }, 10000); // Update every 10 seconds
-        }
-
-        // Countdown timer function
-        function updateCountdown() {
-            const registrationCloseDate = new Date('2025-08-10T23:59:59');
-            const now = new Date();
-            const timeDifference = registrationCloseDate - now;
-
-            if (timeDifference > 0) {
-                const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-                document.getElementById('countdown').textContent = days;
-            }
-        }
-
-        // Update countdown every hour
-        setInterval(updateCountdown, 3600000);
-        updateCountdown(); // Initial call
-
-        // Add hover effects to stat cards
-        document.addEventListener('DOMContentLoaded', () => {
-            const statCards = document.querySelectorAll('.stat-card');
-            statCards.forEach(card => {
-                card.addEventListener('mouseenter', () => {
-                    card.style.transform = 'translateY(-10px) scale(1.02)';
-                });
-
-                card.addEventListener('mouseleave', () => {
-                    card.style.transform = 'translateY(0) scale(1)';
-                });
-            });
-        });
-
-        // Add scroll-triggered animations for timeline items
-        const timelineObserver = new IntersectionObserver((entries) => {
-            entries.forEach((entry, index) => {
-                if (entry.isIntersecting) {
-                    setTimeout(() => {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateX(0)';
-                    }, index * 200);
-                }
-            });
-        }, { threshold: 0.5 });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const timelineItems = document.querySelectorAll('.timeline-item');
-            timelineItems.forEach(item => {
-                timelineObserver.observe(item);
-            });
-        });
-
-        // Add parallax effect to hero section
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const hero = document.querySelector('.hero');
-            if (hero) {
-                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
-            }
-        });
-
-        // Add glowing effect to CTA buttons on hover
-        document.addEventListener('DOMContentLoaded', () => {
-            const ctaButtons = document.querySelectorAll('.cta-button');
-            ctaButtons.forEach(button => {
-                button.addEventListener('mouseenter', () => {
-                    button.style.boxShadow = '0 0 30px rgba(93, 26, 17, 0.6), 0 15px 40px rgba(93, 26, 17, 0.5)';
-                });
-
-                button.addEventListener('mouseleave', () => {
-                    button.style.boxShadow = '0 10px 30px rgba(93, 26, 17, 0.3)';
-                });
-            });
-        });
-    </script>
 </body>
 
 </html>
@@ -1785,8 +1602,10 @@
 <script>
 
     // ADD THIS FUNCTION TO YOUR EXISTING JAVASCRIPT:
+    const PRIZE_AMOUNT = 2000; // Change this value to whatever amount you want
+    const MAX_AMOUNT = 1000; // Change this value to set your maximum amount
 
-    function animateTrophyFill(currentAmount, maxAmount = 10000) {
+    function animateTrophyFill(currentAmount, maxAmount) {
         const fillLevel = document.getElementById('prize-fill-level');
         const coinContainer = document.getElementById('prize-coin-container');
         const amountDisplay = document.getElementById('prize-current-amount');
@@ -1799,13 +1618,17 @@
             fillLevel.style.height = fillPercentage + '%';
         }, 500);
 
-        // Add coins animation
-        const numberOfCoins = Math.min(Math.floor(currentAmount / 50), 20); // Max 20 coins visible
+        // Calculate how many coins can fit in the fill level
+        const maxHeight = 120;
+        const actualFillHeight = (fillPercentage / 100) * maxHeight;
+        const coinsPerRow = 5;
+        const maxRows = Math.floor(actualFillHeight / 12);
+        const totalCoins = maxRows * coinsPerRow;
 
-        for (let i = 0; i < numberOfCoins; i++) {
+        for (let i = 0; i < totalCoins; i++) {
             setTimeout(() => {
                 createAnimatedCoin(coinContainer, i);
-            }, i * 200 + 1000); // Stagger coin drops
+            }, i * 150 + 1000); // Stagger coin drops
         }
 
         // Animate the amount counter
@@ -1816,27 +1639,40 @@
         const coin = document.createElement('div');
         coin.className = 'prize-coin';
 
-        // Adjust positioning for trophy shape (narrower at bottom)
-        const topWidth = 60; // Wider at top
-        const bottomWidth = 30; // Narrower at bottom
-        const containerHeight = 120;
+        // Calculate row and position within row
+        const coinsPerRow = 5; // Fixed number of coins per row
+        const rowIndex = Math.floor(index / coinsPerRow);
+        const positionInRow = index % coinsPerRow;
 
-        // Calculate position based on trophy taper
-        const heightRatio = (containerHeight - (index * 4)) / containerHeight;
-        const availableWidth = bottomWidth + (topWidth - bottomWidth) * heightRatio;
-        const leftOffset = (100 - availableWidth) / 2;
-        const leftPosition = leftOffset + Math.random() * availableWidth;
+        // Calculate height based on row
+        // Calculate height based on current fill level
+        const fillLevel = document.getElementById('prize-fill-level');
+        const currentFillHeight = fillLevel ? parseFloat(fillLevel.style.height) || 0 : 0;
+        const maxHeight = 120; // Container height
+        const actualFillHeight = (currentFillHeight / 100) * maxHeight;
+
+        // Calculate height based on row, but don't exceed fill level
+        const baseHeight = 8 + (rowIndex * 12);
+        const coinHeight = Math.min(baseHeight, actualFillHeight - 12); // Keep coins below fill level
+
+        // Use consistent width for coin placement
+        const availableWidth = 110; // Consistent width percentage
+        const centerOffset = -8; // Center the coins
+
+        // Evenly distribute coins across available width
+        const coinSpacing = availableWidth / (coinsPerRow + 1);
+        const leftPosition = centerOffset + (coinSpacing * (positionInRow + 1));
 
         coin.style.left = leftPosition + '%';
-        coin.style.bottom = (5 + (index * 4)) + 'px';
+        coin.style.bottom = coinHeight + 'px';
         coin.style.animationDelay = '0s';
 
         container.appendChild(coin);
 
         setTimeout(() => {
             if (coin.parentNode) {
-                coin.style.opacity = '0.8';
-                coin.style.transform = 'scale(0.8)';
+                coin.style.opacity = '0.9';
+                coin.style.transform = 'scale(0.9)';
             }
         }, 1500);
     }
@@ -1859,25 +1695,31 @@
 
     // UPDATE YOUR EXISTING startLiveUpdates FUNCTION:
     function startLiveUpdates() {
-        let prizePool = 1170;
-        let participants = 134;
+        // Initial load of participant count
+        updateParticipantCount();
 
-        // Initial trophy fill
+        // Update participant count every 30 seconds (adjust as needed)
+        setInterval(updateParticipantCount, 30000);
+
+        // Keep your existing trophy animation
         setTimeout(() => {
-            animateTrophyFill(prizePool);
+            animateTrophyFill(PRIZE_AMOUNT, MAX_AMOUNT);
         }, 2000);
+    }
 
-        setInterval(() => {
-            if (Math.random() > 0.7) {
-                participants += Math.floor(Math.random() * 3) + 1;
-                prizePool = 500 + (participants * 10);
-
-                document.getElementById('participants').textContent = participants.toLocaleString();
-
-                // Update trophy with new amount
-                animateTrophyFill(prizePool);
-            }
-        }, 10000);
+    // ADD THIS FUNCTION:
+    function updateParticipantCount() {
+        fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSsdCzLkSE7aAH_RxeI_JZWsPXEWsa5eb-ah0317diWWGmfHKEAcT18OkOdSL-gPP4_wWwEXiTeYhO0/pub?output=csv")
+            .then(res => res.text())
+            .then(text => {
+                const rows = text.trim().split("\n");
+                const count = rows.length - 1;
+                document.getElementById('participants').textContent = count.toLocaleString();
+            })
+            .catch(err => {
+                console.error('Error loading participant data:', err);
+                document.getElementById('participants').textContent = "Error";
+            });
     }
 
     // ADD THIS TO YOUR DOMContentLoaded EVENT:
@@ -1889,6 +1731,58 @@
         if (coinContainer) {
             coinContainer.innerHTML = '';
         }
+        startLiveUpdates();
+    });
+
+
+    function updateCountdown() {
+        // Set end date to August 12, 2025 12:00 AM GMT (midnight)
+        const endDate = new Date('2025-08-12T00:00:00Z').getTime();
+
+        // Get current time in GMT
+        const currentTime = new Date().getTime();
+        const timeDifference = endDate - currentTime;
+
+        const countdownElement = document.getElementById('countdown');
+        const labelElement = document.querySelector('#countdown').nextElementSibling;
+
+        if (timeDifference <= 0) {
+            countdownElement.textContent = '0';
+            labelElement.textContent = 'Registration Closed';
+            return;
+        }
+
+        // Calculate time units
+        const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+        // Determine what to display based on time remaining
+        if (days > 0) {
+            countdownElement.textContent = days;
+            labelElement.textContent = days === 1 ? 'Day Until Registration Closes' : 'Days Until Registration Closes';
+        } else if (hours > 0) {
+            countdownElement.textContent = hours;
+            labelElement.textContent = hours === 1 ? 'Hour Until Registration Closes' : 'Hours Until Registration Closes';
+        } else if (minutes > 0) {
+            countdownElement.textContent = minutes;
+            labelElement.textContent = minutes === 1 ? 'Minute Until Registration Closes' : 'Minutes Until Registration Closes';
+        } else {
+            countdownElement.textContent = seconds;
+            labelElement.textContent = seconds === 1 ? 'Second Until Registration Closes' : 'Seconds Until Registration Closes';
+        }
+    }
+
+    // Start the countdown
+    function startCountdown() {
+        updateCountdown(); // Run immediately
+        setInterval(updateCountdown, 1000); // Update every second
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        startCountdown();
     });
 
 
