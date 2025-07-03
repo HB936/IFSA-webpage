@@ -1774,33 +1774,40 @@
         fetch("https://script.google.com/macros/s/AKfycbzB-VDPYDNMo0d1opWqoNlpHAsJ7uIJE69I_slssrVCm7RPmVwg2ndAdrL-rwOZB7fB-Q/exec")
             .then(res => res.json())
             .then(data => {
-                const { totalEuro, participants } = data;
+                const totalParticipants = data.participants;
+                const totalEuro = data.totalEuro;
 
-                PRIZE_AMOUNT = totalEuro;
-                MAX_AMOUNT = totalEuro;
+                // Set variables
+                PRIZE_AMOUNT = Math.round(totalEuro);
+                MAX_AMOUNT = PRIZE_AMOUNT;
 
+                // Update DOM Elements
                 const euroFormatted = PRIZE_AMOUNT.toLocaleString("en-IN", {
                     style: "currency",
                     currency: "EUR",
                     maximumFractionDigits: 0
                 });
 
-                const prizeEl = document.getElementById("prize-current-amount");
-                if (prizeEl) prizeEl.textContent = euroFormatted;
+                const prizeElement = document.getElementById("prize-current-amount");
+                if (prizeElement) prizeElement.textContent = euroFormatted;
 
                 const participantEl = document.getElementById("participants");
-                if (participantEl) participantEl.textContent = participants;
+                if (participantEl) participantEl.textContent = totalParticipants.toLocaleString();
 
-                console.log("✅ Live prize and participants updated.");
+                const totalEuroEl = document.getElementById("totalEuro");
+                if (totalEuroEl) totalEuroEl.textContent = euroFormatted;
+
             })
             .catch(err => {
-                console.error("❌ Error fetching live prize data:", err);
-                ["participants", "prize-current-amount"].forEach(id => {
+                console.error('Error loading participant data:', err);
+                const errorFields = ["participants", "totalEuro", "prize-current-amount"];
+                errorFields.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.textContent = "Error";
                 });
             });
     }
+
 
     window.addEventListener('DOMContentLoaded', updateParticipantCount);
 
