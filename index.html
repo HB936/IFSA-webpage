@@ -1775,16 +1775,17 @@
         fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSsdCzLkSE7aAH_RxeI_JZWsPXEWsa5eb-ah0317diWWGmfHKEAcT18OkOdSL-gPP4_wWwEXiTeYhO0/pub?output=csv")
             .then(res => res.text())
             .then(text => {
-                const rows = text.replace(/\r/g, "").trim().split("\n"); // ✅ FIXED HERE
-                const headers = rows[0].split(",").map(h => h.trim());
-                const paidAmtIndex = headers.indexOf("Paid amt (EURO)");
+                const rows = text.replace(/\r/g, "").trim().split("\n");
 
                 let totalParticipants = rows.length - 1;
                 let totalEuro = 0;
 
                 for (let i = 1; i < rows.length; i++) {
                     const cols = rows[i].split(",").map(c => c.trim());
-                    const paid = parseFloat(cols[22]); // ✅ Using fixed index for EURO
+
+                    // ✅ Always get the last column — safest!
+                    const paidEuroStr = cols[cols.length - 1];
+                    const paid = parseFloat(paidEuroStr);
 
                     if (!isNaN(paid)) {
                         totalEuro += paid;
@@ -1795,14 +1796,12 @@
                 PRIZE_AMOUNT = Math.round(totalEuro);
                 MAX_AMOUNT = PRIZE_AMOUNT;
 
-                // ✅ Format Euro value
                 const euroFormatted = PRIZE_AMOUNT.toLocaleString("en-IN", {
                     style: "currency",
                     currency: "EUR",
                     maximumFractionDigits: 0
                 });
 
-                // ✅ Update DOM
                 const participantEl = document.getElementById("participants");
                 if (participantEl) participantEl.textContent = totalParticipants.toLocaleString();
 
@@ -1823,6 +1822,7 @@
                 });
             });
     }
+
 
 
 
