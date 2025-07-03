@@ -1664,8 +1664,8 @@
 </body>
 
 <script>// ADD THIS FUNCTION TO YOUR EXISTING JAVASCRIPT:
-    let PRIZE_AMOUNT = 0; // Change this value to whatever amount you want
-    let MAX_AMOUNT = 0; // Change this value to set your maximum amount
+    const PRIZE_AMOUNT = 500; // Change this value to whatever amount you want
+    const MAX_AMOUNT = 500; // Change this value to set your maximum amount
 
     function animateTrophyFill(currentAmount, maxAmount) {
         const fillLevel = document.getElementById('prize-fill-level');
@@ -1771,46 +1771,18 @@
 
     // ADD THIS FUNCTION:
     function updateParticipantCount() {
-        fetch("https://script.google.com/macros/s/AKfycbzB-VDPYDNMo0d1opWqoNlpHAsJ7uIJE69I_slssrVCm7RPmVwg2ndAdrL-rwOZB7fB-Q/exec")
-            .then(res => res.json())
-            .then(data => {
-                const totalParticipants = data.participants;
-                const totalEuro = data.totalEuro;
-
-                // Set variables
-                PRIZE_AMOUNT = Math.round(totalEuro);
-                MAX_AMOUNT = PRIZE_AMOUNT;
-
-                // Update DOM Elements
-                const euroFormatted = PRIZE_AMOUNT.toLocaleString("en-IN", {
-                    style: "currency",
-                    currency: "EUR",
-                    maximumFractionDigits: 0
-                });
-
-                const prizeElement = document.getElementById("prize-current-amount");
-                if (prizeElement) prizeElement.textContent = euroFormatted;
-
-                const participantEl = document.getElementById("participants");
-                if (participantEl) participantEl.textContent = totalParticipants.toLocaleString();
-
-                const totalEuroEl = document.getElementById("totalEuro");
-                if (totalEuroEl) totalEuroEl.textContent = euroFormatted;
-
+        fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSsdCzLkSE7aAH_RxeI_JZWsPXEWsa5eb-ah0317diWWGmfHKEAcT18OkOdSL-gPP4_wWwEXiTeYhO0/pub?output=csv")
+            .then(res => res.text())
+            .then(text => {
+                const rows = text.trim().split("\n");
+                const count = rows.length - 1;
+                document.getElementById('participants').textContent = count.toLocaleString();
             })
             .catch(err => {
                 console.error('Error loading participant data:', err);
-                const errorFields = ["participants", "totalEuro", "prize-current-amount"];
-                errorFields.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.textContent = "Error";
-                });
+                document.getElementById('participants').textContent = "Error";
             });
     }
-
-
-    window.addEventListener('DOMContentLoaded', updateParticipantCount);
-
     // ADD THIS TO YOUR DOMContentLoaded EVENT:
     document.addEventListener('DOMContentLoaded', () => {
         // ... your existing code ...
