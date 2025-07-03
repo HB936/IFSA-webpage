@@ -1769,6 +1769,21 @@
         }, 2000);
     }
 
+    console.log("Headers:", headers);
+    console.log("Paid amt index:", paidAmtIndex);
+
+    for (let i = 1; i < rows.length; i++) {
+        const cols = rows[i].split(",");
+        console.log(`Row ${i}:`, cols);
+
+        const paid = parseFloat(cols[paidAmtIndex]);
+        console.log(`Parsed paid amount:`, paid);
+
+        if (!isNaN(paid)) {
+            totalEuro += paid;
+        }
+    }
+
     // ADD THIS FUNCTION:
     function updateParticipantCount() {
         fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSsdCzLkSE7aAH_RxeI_JZWsPXEWsa5eb-ah0317diWWGmfHKEAcT18OkOdSL-gPP4_wWwEXiTeYhO0/pub?output=csv")
