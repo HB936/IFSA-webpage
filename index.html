@@ -1769,7 +1769,7 @@
         }, 2000);
     }
 
-
+// WORDPRESS ME SAME DAALNA HAI AND CHANGE THE GLOBAL VARIABLES FROM CONST TO LET TOO
     // ADD THIS FUNCTION:
     function updateParticipantCount() {
         fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSsdCzLkSE7aAH_RxeI_JZWsPXEWsa5eb-ah0317diWWGmfHKEAcT18OkOdSL-gPP4_wWwEXiTeYhO0/pub?output=csv")
@@ -1778,7 +1778,7 @@
                 const rows = text.replace(/\r/g, "").trim().split("\n");
 
                 let totalParticipants = rows.length - 1;
-                let totalEuro = 0;
+                let totalEuro = 500;
 
                 for (let i = 1; i < rows.length; i++) {
                     const cols = rows[i].split(",").map(c => c.trim());
@@ -1829,7 +1829,7 @@
 
     window.addEventListener("DOMContentLoaded", updateParticipantCount);
     setInterval(updateParticipantCount, 60000 * 5); // every 60 seconds
-
+//YAHA TAK
     // ADD THIS TO YOUR DOMContentLoaded EVENT:
     document.addEventListener('DOMContentLoaded', () => {
         // ... your existing code ...
