@@ -1664,8 +1664,8 @@
 </body>
 
 <script>// ADD THIS FUNCTION TO YOUR EXISTING JAVASCRIPT:
-    let PRIZE_AMOUNT = Math.round(totalEuro); // Change this value to whatever amount you want
-    let MAX_FILL_AMOUNT = PRIZE_AMOUNT; // Change this value to set your maximum amount
+    let PRIZE_AMOUNT = 0; // Change this value to whatever amount you want
+    let MAX_FILL_AMOUNT = 0; // Change this value to set your maximum amount
 
     function animateTrophyFill(currentAmount, maxAmount) {
         const fillLevel = document.getElementById('prize-fill-level');
@@ -1789,44 +1789,44 @@
                     }
                 }
 
-                // 🔁 Update constants
-                const PRIZE_AMOUNT = Math.round(totalEuro);
-                const MAX_AMOUNT = PRIZE_AMOUNT;
+                // ✅ Update global values
+                PRIZE_AMOUNT = Math.round(totalEuro);
+                MAX_FILL_AMOUNT = PRIZE_AMOUNT;
 
-                // 💶 Format Euro string
+                // ✅ Format Euro value for display
                 const euroFormatted = PRIZE_AMOUNT.toLocaleString("en-IN", {
                     style: "currency",
                     currency: "EUR",
                     maximumFractionDigits: 0
                 });
 
-                // 👤 Update Participants count
+                // ✅ Update participants count
                 const participantEl = document.getElementById("participants");
                 if (participantEl) participantEl.textContent = totalParticipants.toLocaleString();
 
-                // 🏆 Update Prize Pool amount in trophy jar
+                // ✅ Update prize amount text
                 const prizeAmountEl = document.getElementById("prize-current-amount");
                 if (prizeAmountEl) prizeAmountEl.textContent = euroFormatted;
 
-                // Optionally: Update jar fill level
+                // ✅ Update fill height of the coin jar
                 const fillLevel = document.getElementById("prize-fill-level");
-                if (fillLevel && MAX_AMOUNT > 0) {
-                    const percent = Math.min((PRIZE_AMOUNT / MAX_AMOUNT) * 100, 100);
+                if (fillLevel && MAX_FILL_AMOUNT > 0) {
+                    const percent = Math.min((PRIZE_AMOUNT / MAX_FILL_AMOUNT) * 100, 100);
                     fillLevel.style.height = `${percent}%`;
                 }
             })
             .catch(err => {
                 console.error('Error loading participant data:', err);
-                const fallbackIds = ['participants', 'prize-current-amount'];
-                fallbackIds.forEach(id => {
+                ['participants', 'prize-current-amount'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.textContent = "Error";
                 });
             });
     }
 
+
     window.addEventListener("DOMContentLoaded", updateParticipantCount);
-    setInterval(updateParticipantCount, 60000*5); // every 60 seconds
+    setInterval(updateParticipantCount, 60000 * 5); // every 60 seconds
 
     // ADD THIS TO YOUR DOMContentLoaded EVENT:
     document.addEventListener('DOMContentLoaded', () => {
