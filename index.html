@@ -1769,20 +1769,6 @@
         }, 2000);
     }
 
-    console.log("Headers:", headers);
-    console.log("Paid amt index:", paidAmtIndex);
-
-    for (let i = 1; i < rows.length; i++) {
-        const cols = rows[i].split(",");
-        console.log(`Row ${i}:`, cols);
-
-        const paid = parseFloat(cols[paidAmtIndex]);
-        console.log(`Parsed paid amount:`, paid);
-
-        if (!isNaN(paid)) {
-            totalEuro += paid;
-        }
-    }
 
     // ADD THIS FUNCTION:
     function updateParticipantCount() {
@@ -1795,6 +1781,9 @@
 
                 let totalParticipants = rows.length - 1;
                 let totalEuro = 0;
+
+                console.log("Headers:", headers);
+                console.log("Paid amt index:", paidAmtIndex);
 
                 for (let i = 1; i < rows.length; i++) {
                     const cols = rows[i].split(",");
