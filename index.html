@@ -1784,7 +1784,7 @@
 
                 for (let i = 1; i < rows.length; i++) {
                     const cols = rows[i].split(",").map(c => c.trim());
-                    const paid = parseFloat(cols[paidAmtIndex]);
+                    const paid = parseFloat(cols[22]); // ✅ Using fixed index for EURO
 
                     if (!isNaN(paid)) {
                         totalEuro += paid;
