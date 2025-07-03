@@ -1776,19 +1776,20 @@
             .then(res => res.text())
             .then(text => {
                 const rows = text.trim().split("\n");
-                const headers = rows[0].split(",").map(h => h.trim()); // ✅ Fix added here
+                const headers = rows[0].split(",").map(h => h.trim()); // ✅ Trim header fields
                 const paidAmtIndex = headers.indexOf("Paid amt (EURO)");
-
 
                 let totalParticipants = rows.length - 1;
                 let totalEuro = 0;
 
-
                 for (let i = 1; i < rows.length; i++) {
-                    const cols = rows[i].split(",");
+                    const cols = rows[i].split(",").map(c => c.trim()); // ✅ Trim each column
                     const paid = parseFloat(cols[paidAmtIndex]);
-                    console.log("Row:", rows[i]);
-                    console.log("Parsed Column:", cols[paidAmtIndex]);
+
+                    // Optional: Debug log
+                    // console.log("Row:", rows[i]);
+                    // console.log("Parsed Column:", cols[paidAmtIndex]);
+
                     if (!isNaN(paid)) {
                         totalEuro += paid;
                     }
@@ -1796,7 +1797,7 @@
 
                 // ✅ Update global values
                 PRIZE_AMOUNT = Math.round(totalEuro);
-                MAX_FILL_AMOUNT = PRIZE_AMOUNT;
+                MAX_AMOUNT = PRIZE_AMOUNT;
 
                 // ✅ Format Euro value for display
                 const euroFormatted = PRIZE_AMOUNT.toLocaleString("en-IN", {
@@ -1805,7 +1806,7 @@
                     maximumFractionDigits: 0
                 });
 
-                // ✅ Update participants count
+                // ✅ Update participant count
                 const participantEl = document.getElementById("participants");
                 if (participantEl) participantEl.textContent = totalParticipants.toLocaleString();
 
@@ -1813,10 +1814,10 @@
                 const prizeAmountEl = document.getElementById("prize-current-amount");
                 if (prizeAmountEl) prizeAmountEl.textContent = euroFormatted;
 
-                // ✅ Update fill height of the coin jar
+                // ✅ Update coin jar fill height
                 const fillLevel = document.getElementById("prize-fill-level");
-                if (fillLevel && MAX_FILL_AMOUNT > 0) {
-                    const percent = Math.min((PRIZE_AMOUNT / MAX_FILL_AMOUNT) * 100, 100);
+                if (fillLevel && MAX_AMOUNT > 0) {
+                    const percent = Math.min((PRIZE_AMOUNT / MAX_AMOUNT) * 100, 100);
                     fillLevel.style.height = `${percent}%`;
                 }
             })
@@ -1828,6 +1829,7 @@
                 });
             });
     }
+
 
 
     window.addEventListener("DOMContentLoaded", updateParticipantCount);
