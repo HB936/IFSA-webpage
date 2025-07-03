@@ -1789,29 +1789,38 @@
                     }
                 }
 
-                // Update DOM
-                document.getElementById('participants').textContent = totalParticipants.toLocaleString();
-                document.getElementById('totalEuro').textContent = totalEuro.toLocaleString("en-IN", {
+                // Set variables
+                PRIZE_AMOUNT = Math.round(totalEuro);
+                MAX_AMOUNT = PRIZE_AMOUNT;
+
+                // Update DOM Elements
+                const euroFormatted = PRIZE_AMOUNT.toLocaleString("en-IN", {
                     style: "currency",
                     currency: "EUR",
                     maximumFractionDigits: 0
                 });
 
-                // Dynamically assign constants
-                PRIZE_AMOUNT = totalEuro;
-                MAX_AMOUNT = totalEuro;
+                const prizeElement = document.getElementById("prize-current-amount");
+                if (prizeElement) prizeElement.textContent = euroFormatted;
 
-                console.log("PRIZE_AMOUNT:", PRIZE_AMOUNT);
-                console.log("MAX_AMOUNT:", MAX_AMOUNT);
+                const participantEl = document.getElementById("participants");
+                if (participantEl) participantEl.textContent = totalParticipants.toLocaleString();
 
-                // You can now use PRIZE_AMOUNT and MAX_AMOUNT elsewhere
+                const totalEuroEl = document.getElementById("totalEuro");
+                if (totalEuroEl) totalEuroEl.textContent = euroFormatted;
+
             })
             .catch(err => {
                 console.error('Error loading participant data:', err);
-                document.getElementById('participants').textContent = "Error";
-                document.getElementById('totalEuro').textContent = "Error";
+                const errorFields = ["participants", "totalEuro", "prize-current-amount"];
+                errorFields.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = "Error";
+                });
             });
     }
+
+    window.addEventListener('DOMContentLoaded', updateParticipantCount);
 
     // ADD THIS TO YOUR DOMContentLoaded EVENT:
     document.addEventListener('DOMContentLoaded', () => {
