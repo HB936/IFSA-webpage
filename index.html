@@ -1783,8 +1783,9 @@
                 let totalParticipants = rows.length - 1;
                 let totalEuro = 0;
 
-                console.log("Headers:", headers);
-                console.log("Paid amt index:", paidAmtIndex);
+                console.log("Row:", rows[i]);
+                console.log("Parsed Column:", cols[paidAmtIndex]);
+
 
                 for (let i = 1; i < rows.length; i++) {
                     const cols = rows[i].split(",");
