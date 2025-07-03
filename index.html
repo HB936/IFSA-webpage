@@ -1783,11 +1783,10 @@
                 let totalParticipants = rows.length - 1;
                 let totalEuro = 0;
 
-                console.log("Row:", rows[i]);
-                console.log("Parsed Column:", cols[paidAmtIndex]);
-
 
                 for (let i = 1; i < rows.length; i++) {
+                    console.log("Row:", rows[i]);
+                    console.log("Parsed Column:", cols[paidAmtIndex]);
                     const cols = rows[i].split(",");
                     const paid = parseFloat(cols[paidAmtIndex]);
                     if (!isNaN(paid)) {
