@@ -1770,50 +1770,32 @@
     }
 
     // ADD THIS FUNCTION:
-    function updateParticipantCount() {
-        fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSsdCzLkSE7aAH_RxeI_JZWsPXEWsa5eb-ah0317diWWGmfHKEAcT18OkOdSL-gPP4_wWwEXiTeYhO0/pub?output=csv")
-            .then(res => res.text())
-            .then(text => {
-                const rows = text.trim().split("\n");
-                const headers = rows[0].split(",");
-                const paidAmtIndex = headers.indexOf("Paid amt (EURO)");
+    function updateParticipantData() {
+        fetch("https://script.google.com/macros/s/AKfycbzB-VDPYDNMo0d1opWqoNlpHAsJ7uIJE69I_slssrVCm7RPmVwg2ndAdrL-rwOZB7fB-Q/exec")
+            .then(res => res.json())
+            .then(data => {
+                const { totalEuro, participants } = data;
 
-                let totalParticipants = rows.length - 1;
-                let totalEuro = 0;
+                PRIZE_AMOUNT = totalEuro;
+                MAX_AMOUNT = totalEuro;
 
-                for (let i = 1; i < rows.length; i++) {
-                    const cols = rows[i].split(",");
-                    const paid = parseFloat(cols[paidAmtIndex]);
-                    if (!isNaN(paid)) {
-                        totalEuro += paid;
-                    }
-                }
-
-                // Set variables
-                PRIZE_AMOUNT = Math.round(totalEuro);
-                MAX_AMOUNT = PRIZE_AMOUNT;
-
-                // Update DOM Elements
                 const euroFormatted = PRIZE_AMOUNT.toLocaleString("en-IN", {
                     style: "currency",
                     currency: "EUR",
                     maximumFractionDigits: 0
                 });
 
-                const prizeElement = document.getElementById("prize-current-amount");
-                if (prizeElement) prizeElement.textContent = euroFormatted;
+                const prizeEl = document.getElementById("prize-current-amount");
+                if (prizeEl) prizeEl.textContent = euroFormatted;
 
                 const participantEl = document.getElementById("participants");
-                if (participantEl) participantEl.textContent = totalParticipants.toLocaleString();
+                if (participantEl) participantEl.textContent = participants;
 
-                const totalEuroEl = document.getElementById("totalEuro");
-                if (totalEuroEl) totalEuroEl.textContent = euroFormatted;
-
+                console.log("✅ Live prize and participants updated.");
             })
             .catch(err => {
-                console.error('Error loading participant data:', err);
-                const errorFields = ["participants", "totalEuro", "prize-current-amount"];
-                errorFields.forEach(id => {
+                console.error("❌ Error fetching live prize data:", err);
+                ["participants", "prize-current-amount"].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.textContent = "Error";
                 });
