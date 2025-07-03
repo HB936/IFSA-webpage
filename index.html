@@ -1664,8 +1664,8 @@
 </body>
 
 <script>// ADD THIS FUNCTION TO YOUR EXISTING JAVASCRIPT:
-    const PRIZE_AMOUNT = 500; // Change this value to whatever amount you want
-    const MAX_AMOUNT = 500; // Change this value to set your maximum amount
+    let PRIZE_AMOUNT = Math.round(totalEuro); // Change this value to whatever amount you want
+    let MAX_FILL_AMOUNT = PRIZE_AMOUNT; // Change this value to set your maximum amount
 
     function animateTrophyFill(currentAmount, maxAmount) {
         const fillLevel = document.getElementById('prize-fill-level');
